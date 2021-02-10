@@ -142,13 +142,55 @@ public:
 	}
 
 
-	void splice(const List<T>& list)
-	{
-		Node<T>* p = first;
-		for (int i = 0; i < size - 1; i++)
-			p = p->next;
-		p->next = list.first;
-		size += list.size;
+	void splice(int pos, List& other, int first, int count) {
+
+		int last = first + count;
+		if (pos > this->size || pos < 0
+			|| last < first
+			|| (this == &other && pos >= first && pos <= last)
+			|| last > other.size)
+			throw "Wrong parameters";
+
+		Node<T>* p_pos_pre1 = NULL;
+		Node<T>* p_first_pre2 = NULL, * p_last2 = NULL;
+
+		p_pos_pre1 = this->first;
+		for (int i = 0; i < pos - 1; i++)
+			p_pos_pre1 = p_pos_pre1->next;
+
+		p_first_pre2 = other.first;
+		for (int i = 0; i < first - 1; i++)
+			p_first_pre2 = p_first_pre2->next;
+
+		p_last2 = p_first_pre2;
+		int temp_count = first == 0 ? count - 1 : count;
+		for (int i = 0; i < temp_count; i++)
+			p_last2 = p_last2->next;
+
+		Node<T>* temp;
+		if (first == 0)
+		{
+			temp = other.first;
+			other.first = p_last2->next;
+		}
+		else
+		{
+			temp = p_first_pre2->next;
+			p_first_pre2->next = p_last2->next;
+		}
+
+		if (pos == 0)//(pos == this->size) case works well
+		{
+			p_last2->next = this->first;
+			this->first = temp;
+		}
+		else
+		{
+			p_last2->next = p_pos_pre1->next;
+			p_pos_pre1->next = temp;
+		}
+		other.size -= count;
+		this->size += count;
 	}
 
 };
