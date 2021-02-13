@@ -11,6 +11,7 @@ template <class T>
 class List {
 private:
 	Node<T>* first;
+	Node<T>* before_first;
 	int size;
 	bool contains(Node<T>* node)
 	{
@@ -29,6 +30,7 @@ public:
 	List()
 	{
 		first = NULL;
+		before_first = NULL;
 		size = 0;
 	}
 
@@ -42,6 +44,7 @@ public:
 			if (i == 0)
 			{
 				first = temp;
+				before_first = new Node<T>{ NULL,first };
 				p = temp;
 				continue;
 			}
@@ -53,20 +56,22 @@ public:
 
 	~List() {
 		Node<T>* p = first;
-		for (int i = 0; i < size; i++)
+		while (p != NULL)
 		{
 			p = p->next;
 			delete first;
 			first = p;
 		}
+
 	}
 
 	bool is_empty() { return size == 0; }
 	int get_size() { return size; }
 	Node<T>* get_first() const { return first; }
+	Node<T>* get_before_first() const { return before_first; }
 
 	T& get_data(Node<T>* node) {
-		if (node != NULL)
+		if (node != NULL || node != before_first)
 			return node->info;
 		throw "NULL node";
 	}
@@ -81,10 +86,20 @@ public:
 	}
 
 	void insert_after(Node<T>* node, T value) {
-		//if (!contains(node)) ????????????? ոնց ստուգեմ,թե էդ List-ի node-ն ա,թե չէ
+		//if (!contains(node)) ????????????? 
 		//	throw "Wrong node pointer";
-		Node<T>* n = new Node<T>{ value, node->next };
-		node->next = n;
+
+		Node<T>* n;
+		if (node == NULL)//also is true,that first == NULL && before_first == NULL
+		{
+			first = new Node<T>{ value, NULL };
+			before_first = new Node<T>{ NULL,first };
+		}
+		else
+		{
+			n = new Node<T>{ value, node->next };
+			node->next = n;
+		}
 		size++;
 	}
 	void insert_at(int n, T value) {
@@ -94,6 +109,7 @@ public:
 		{
 			Node<T>* p = new Node<T>{ value ,first };
 			first = p;
+			before_first = new Node<T>{ NULL,first };
 			size++;
 			return;
 		}
@@ -141,13 +157,38 @@ public:
 		cout << "SIZE:" << size << endl;
 	}
 
+	//std::forward_list
+	void splice_after(Node<T>* pos, List& other, Node<T>* first, Node<T>* last)
+	{
+		if (this == &other && pos >= first && pos <= last)
+			throw "Wrong parameters";
+
+		Node<T>* p_first_pre2 = before_first;
+		Node<T>* temp_first = other.first;
+		int diff_size = 0;
+		while (temp_first != last)
+		{
+			temp_first = temp_first->next;
+			diff_size++;
+		}
+
+		while (p_first_pre2 != NULL && p_first_pre2->next != first)
+			p_first_pre2 = p_first_pre2->next;
+
+		p_first_pre2->next = last;
+		last->next = pos->next;
+		pos->next = first;
+
+		other.size -= diff_size;
+		this->size += diff_size;
+	}
 
 	void splice(int pos, List& other, int first, int count) {
 
 		int last = first + count;
 		if (pos > this->size || pos < 0
 			|| last < first
-			|| (this == &other && pos >= first && pos <= last)
+			|| (this == &other && pos > first && pos < last)
 			|| last > other.size)
 			throw "Wrong parameters";
 
@@ -192,5 +233,4 @@ public:
 		other.size -= count;
 		this->size += count;
 	}
-
 };
