@@ -34,10 +34,10 @@ public:
 		size = 0;
 	}
 
-	List(const List& list) {
+	List(List& list) {
 		Node<T>* p = NULL, * temp, * p1 = list.first;
-
-		for (int i = 0; i < list.size; i++)
+		size = list.get_size();
+		for (int i = 0; i < size; i++)
 		{
 			temp = new Node<T>{ get_data(p1),NULL };
 			p1 = p1->next;
@@ -51,7 +51,6 @@ public:
 			p->next = temp;
 			p = p->next;
 		}
-		size = list.size;
 	}
 
 	~List() {
@@ -62,22 +61,32 @@ public:
 			delete first;
 			first = p;
 		}
-
+		first = NULL;
 	}
 
-	bool is_empty() { return size == 0; }
-	int get_size() { return size; }
+	bool is_empty() { return get_size() == 0; }
+
+	int get_size() {
+		size = 0;
+		Node<T>* temp = first;
+		while (temp != NULL)
+		{
+			temp = temp->next;
+			size++;
+		}
+		return size;
+	}
 	Node<T>* get_first() const { return first; }
 	Node<T>* get_before_first() const { return before_first; }
 
 	T& get_data(Node<T>* node) {
-		if (node != NULL || node != before_first)
+		if (node != NULL && node != before_first)
 			return node->info;
 		throw "NULL node";
 	}
 
 	T& get_at(int n) {
-		if (n < 0 || n >= size)
+		if (n < 0 || n >= get_size())
 			throw "Wrong index";
 		Node<T>* p = first;
 		for (int i = 0; i < n; i++)
@@ -88,7 +97,6 @@ public:
 	void insert_after(Node<T>* node, T value) {
 		//if (!contains(node)) ????????????? 
 		//	throw "Wrong node pointer";
-
 		Node<T>* n;
 		if (node == NULL)//also is true,that first == NULL && before_first == NULL
 		{
@@ -100,17 +108,16 @@ public:
 			n = new Node<T>{ value, node->next };
 			node->next = n;
 		}
-		size++;
 	}
+
 	void insert_at(int n, T value) {
-		if (n < 0 || n > size)
+		if (n < 0 || n > get_size())
 			throw "Wrong index";
 		if (n == 0)
 		{
 			Node<T>* p = new Node<T>{ value ,first };
 			first = p;
 			before_first = new Node<T>{ NULL,first };
-			size++;
 			return;
 		}
 		Node<T>* p = first;
@@ -120,17 +127,14 @@ public:
 	}
 
 	void delete_after(Node<T>* node) {
-		if (is_empty())
-			throw "List is empty";
 		if (node->next == NULL)
 			throw "Can't delete";
 		Node<T>* p = node->next;
 		node->next = p->next;
 		delete p;
-		size--;
 	}
 	void delete_at(int n) {
-		if (n < 0 || n >= size)
+		if (n < 0 || n >= get_size())
 			throw "Wrong index";
 		if (n == 0 && size > 0)
 		{
@@ -148,39 +152,30 @@ public:
 
 	void print()
 	{
-		Node<T>* p = first;
-		for (int i = 0; i < size; i++)
+		Node<T>* p = this->first;
+		while (p != NULL)
 		{
 			cout << p->info << ' ';
 			p = p->next;
 		}
-		cout << "SIZE:" << size << endl;
+		cout << "SIZE:" << get_size() << endl;
 	}
 
 	//std::forward_list
 	void splice_after(Node<T>* pos, List& other, Node<T>* first, Node<T>* last)
 	{
-		if (this == &other && pos >= first && pos <= last)
+		if (this == &other && pos >= first && pos <= last
+			|| first == NULL || last == NULL)
 			throw "Wrong parameters";
 
-		Node<T>* p_first_pre2 = before_first;
-		Node<T>* temp_first = other.first;
-		int diff_size = 0;
-		while (temp_first != last)
-		{
-			temp_first = temp_first->next;
-			diff_size++;
-		}
+		Node<T>* p_first_pre2 = other.before_first;
 
-		while (p_first_pre2 != NULL && p_first_pre2->next != first)
+		while (p_first_pre2->next != first)
 			p_first_pre2 = p_first_pre2->next;
 
-		p_first_pre2->next = last;
+		p_first_pre2->next = last->next;
 		last->next = pos->next;
 		pos->next = first;
-
-		other.size -= diff_size;
-		this->size += diff_size;
 	}
 
 	void splice(int pos, List& other, int first, int count) {
