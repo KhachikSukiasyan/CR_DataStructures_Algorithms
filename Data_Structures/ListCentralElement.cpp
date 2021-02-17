@@ -6,7 +6,7 @@ T ListsCentralElement(List<T> list)
 {
 	Node<T>* p1 = list.get_first();
 	Node<T>* p2 = p1;
-	while (p2 != NULL && p2->next != NULL && p2->next->next != NULL)
+	while (p2 != NULL && p2->next != NULL)
 	{
 		p2 = p2->next->next;
 		p1 = p1->next;
