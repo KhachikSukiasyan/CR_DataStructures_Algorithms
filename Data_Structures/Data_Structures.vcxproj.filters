@@ -5,5 +5,6 @@
     <ClCompile Include="List.cpp" />
     <ClCompile Include="Vector.cpp" />
     <ClCompile Include="ListCentralElement.cpp" />
+    <ClCompile Include="ListRemoveCycle.cpp" />
   </ItemGroup>
 </Project>
