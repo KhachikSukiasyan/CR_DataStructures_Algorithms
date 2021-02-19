@@ -17,12 +17,7 @@ bool RemoveCycle(List<T>& list)
 	if (p2 == NULL || p2->next == NULL)
 		return false;
 
-	if (p1->next == first)
-	{
-		p2->next = NULL;
-		return true;
-	}
-	else
+	if (p1->next != first)
 	{
 		p1 = first;
 		p2 = p2->next->next;
@@ -31,7 +26,8 @@ bool RemoveCycle(List<T>& list)
 			p1 = p1->next;
 			p2 = p2->next;
 		}
-		p2->next = NULL;
-		return true;
 	}
+
+	p2->next = NULL;
+	return true;
 }
