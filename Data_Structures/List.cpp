@@ -30,7 +30,7 @@ public:
 	List()
 	{
 		first = NULL;
-		before_first = NULL;
+		before_first = new Node<T>{ NULL, NULL };
 		size = 0;
 	}
 
@@ -54,28 +54,65 @@ public:
 	}
 
 	~List() {
-		Node<T>* p = first;
-		while (p != NULL)
+		Node<T>* p = before_first;
+		size = get_size();
+		for (int i = 0; i <= size; i++)
 		{
 			p = p->next;
-			delete first;
-			first = p;
+			delete before_first;
+			before_first = p;
 		}
+		before_first = NULL;
 		first = NULL;
 	}
 
 	bool is_empty() { return get_size() == 0; }
 
 	int get_size() {
+
 		size = 0;
-		Node<T>* temp = first;
-		while (temp != NULL)
+		Node<T>* slow = first;
+		Node<T>* fast = slow;
+
+		while (fast != NULL && fast->next != NULL)
 		{
-			temp = temp->next;
+			slow = slow->next;
+			fast = fast->next->next;
 			size++;
+			if (slow == fast)
+				break;
+		}
+		if (fast == NULL || fast->next == NULL)
+		{
+			while (slow != NULL)
+			{
+				slow = slow->next;
+				size++;
+			}
+		}
+		else
+		{
+			slow = first;
+			while (slow != fast)
+			{
+				slow = slow->next;
+				fast = fast->next;
+			}
+
+			bool b = false;
+			size = 0;
+			Node<T>* temp = first;
+			while (temp != fast || b == false)
+			{
+				if (temp == fast)
+					b = true;
+				temp = temp->next;
+				size++;
+			}
 		}
 		return size;
 	}
+
 	Node<T>* get_first() const { return first; }
 	Node<T>* get_before_first() const { return before_first; }
 
@@ -98,16 +135,10 @@ public:
 		//if (!contains(node)) ????????????? 
 		//	throw "Wrong node pointer";
 		Node<T>* n;
-		if (node == NULL)//also is true,that first == NULL && before_first == NULL
-		{
-			first = new Node<T>{ value, NULL };
-			before_first = new Node<T>{ NULL,first };
-		}
-		else
-		{
-			n = new Node<T>{ value, node->next };
-			node->next = n;
-		}
+		n = new Node<T>{ value, node->next };
+		if (node->info == NULL && node->next == NULL)
+			first = n;
+		node->next = n;
 	}
 
 	void insert_at(int n, T value) {
@@ -153,12 +184,13 @@ public:
 	void print()
 	{
 		Node<T>* p = this->first;
-		while (p != NULL)
+		size = get_size();
+		for (int i = 0; i < size; i++)
 		{
 			cout << p->info << ' ';
 			p = p->next;
 		}
-		cout << "SIZE:" << get_size() << endl;
+		cout << "SIZE:" << size << endl;
 	}
 
 	//std::forward_list
