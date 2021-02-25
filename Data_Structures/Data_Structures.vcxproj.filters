@@ -6,5 +6,6 @@
     <ClCompile Include="Vector.cpp" />
     <ClCompile Include="ListCentralElement.cpp" />
     <ClCompile Include="ListRemoveCycle.cpp" />
+    <ClCompile Include="Tree.cpp" />
   </ItemGroup>
 </Project>
